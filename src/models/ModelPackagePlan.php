@@ -33,7 +33,8 @@ class ModelPackagePlan extends Model
             ->withDefault();
     }
 
-    public function activate(?Carbon $currentDateTime = null, ?int $updatedBy = null) {
+    public function activate(?Carbon $currentDateTime = null, ?int $updatedBy = null) 
+    {
         $updatedBy = $updatedBy ?? auth()->id();
         $currentDateTime = $currentDateTime ?? Carbon::now();
         
@@ -58,7 +59,8 @@ class ModelPackagePlan extends Model
         $this->save();
     }
 
-    private function cancel(?Carbon $cancelDateTime = null, ?int $updatedBy = null, ?string $remark = null) {
+    private function cancel(?Carbon $cancelDateTime = null, ?int $updatedBy = null, ?string $remark = null) 
+    {
         $cancelDateTime = $cancelDateTime ?? Carbon::now();
         $updatedBy = $updatedBy ?? auth()->id();
 

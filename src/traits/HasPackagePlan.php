@@ -36,7 +36,8 @@ trait HasPackagePlan
         ->first();
     }
 
-    public function getBenefitValue(string $benefitName, ?\DateTimeInterface $currentDateTime = null): mixed {
+    public function getBenefitValue(string $benefitName, ?\DateTimeInterface $currentDateTime = null): mixed 
+    {
         $currentDateTime = $currentDateTime ?? now();
         $packagePlan = $this->currentPackagePlan();
         
@@ -57,7 +58,8 @@ trait HasPackagePlan
         return $this->castBenefitValue($benefitPackagePlan->pivot->value, $benefitPackagePlan->type);
     }
 
-    public function subscribeToPackagePlan(PackagePlanPrice $packagePlanPrice, ?Carbon $currentDateTime = null, ?int $createdBy = null): ModelPackagePlan {
+    public function subscribeToPackagePlan(PackagePlanPrice $packagePlanPrice, ?Carbon $currentDateTime = null, ?int $createdBy = null): ModelPackagePlan 
+    {
         $currentDateTime = $currentDateTime ?? Carbon::now();
         $isStartValid = !$packagePlanPrice->start_date || Carbon::parse($packagePlanPrice->start_date)->lte($currentDateTime);
         $isEndValid = !$packagePlanPrice->end_date || Carbon::parse($packagePlanPrice->end_date)->gte($currentDateTime);
@@ -75,7 +77,8 @@ trait HasPackagePlan
         ]);
     }
 
-    private function castBenefitValue(string $value, string $type): mixed {
+    private function castBenefitValue(string $value, string $type): mixed 
+    {
         if ($value === null) {
             return null;
         }
