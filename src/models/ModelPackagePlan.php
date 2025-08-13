@@ -7,14 +7,11 @@ use Illuminate\Support\Carbon;
 
 class ModelPackagePlan extends Model
 {
-    protected $gaurded = [];
+    protected $guarded = [];
 
-    public
-     const STATUS_PENDING = 'pending';
-    public
-     const STATUS_ACTIVE = 'active';
-    public
-     const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_CANCELLED = 'cancelled';
 
     public function model()
     {
@@ -33,10 +30,19 @@ class ModelPackagePlan extends Model
             ->withDefault();
     }
 
-    public function activate(?Carbon $currentDateTime = null, ?int $updatedBy = null) 
+    public function logs()
     {
-        $updatedBy = $updatedBy ?? auth()->id();
+        return $this->hasMany(ModelPackagePlanLog::class);
+    }
+
+    public function activate(?Carbon $currentDateTime = null, int $updatedBy) 
+    {
+        if ($this->status !== self::STATUS_PENDING) {
+            return $this;
+        }
+
         $currentDateTime = $currentDateTime ?? Carbon::now();
+        $endDate = $currentDateTime->copy()->addDays($this->packagePlanPrice->day_duration);
         
         $existedPackagePlans = $this->packagePlans()
             ->where('status', ModelPackagePlan::STATUS_ACTIVE)
@@ -52,26 +58,66 @@ class ModelPackagePlan extends Model
                 $updatedBy
             );
         });
-
-        $this->status = self::STATUS_ACTIVE;
-        $this->start_date = $currentDateTime;
-        $this->end_date = $currentDateTime->addDays($this->packagePlanPrice->day_duration);
-        $this->save();
-    }
-
-    private function cancel(?Carbon $cancelDateTime = null, ?int $updatedBy = null, ?string $remark = null) 
-    {
-        $cancelDateTime = $cancelDateTime ?? Carbon::now();
-        $updatedBy = $updatedBy ?? auth()->id();
-
-        if (!in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_PENDING])) {
-            throw new \InvalidArgumentException('You can only cancel an active or pending package plan.');
+        try {
+            \DB::beginTransaction();
+                $this->status = self::STATUS_ACTIVE;
+                $this->start_date = $currentDateTime;
+                $this->end_date = $endDate;
+                $this->updated_by = $updatedBy;
+                $this->save();
+                $this->logAction('update', 'change status to active', [
+                    'status' => self::STATUS_ACTIVE,
+                    'start_date' => $currentDateTime,
+                    'end_date' => $endDate,
+                    'updated_by' => $updatedBy
+                ]);
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            throw $e;
         }
 
-        $this->status = self::STATUS_CANCELLED;
-        $this->end_date = $cancelDateTime;
-        $this->remark = $remark;
-        $this->updated_by = $updatedBy;
-        $this->save();
+        return $this;
+    }
+    
+    public function cancel(?Carbon $cancelDateTime = null, int $updatedBy, ?string $remark = null) 
+    {
+        $cancelDateTime = $cancelDateTime ?? Carbon::now();
+
+        if (!in_array($this->status, [self::STATUS_ACTIVE, self::STATUS_PENDING])) {
+            return $this;
+        }
+        try {
+            \DB::beginTransaction();
+                $this->status = self::STATUS_CANCELLED;
+                $this->end_date = $cancelDateTime;
+                $this->remark = $remark;
+                $this->updated_by = $updatedBy;
+                $this->save();
+                $this->logAction('cancel', null, [
+                    'status' => self::STATUS_CANCELLED,
+                    'end_date' => $cancelDateTime,
+                    'remark' => $remark,
+                    'updated_by' => $updatedBy
+                ]);
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            throw $e;
+        }
+        
+        return $this;
+    }
+
+    public function logAction(string $action, ?string $description = null, array $changes = [])
+    {
+        return $this->logs()->create([
+            'model'                => get_class($this->model),
+            'model_package_plan_id'=> $this->id,
+            'action'               => $action,
+            'description'          => $description,
+            'changes'              => $changes ?: null,
+            'logged_at'            => now(),
+        ]);
     }
 }
