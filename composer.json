@@ -26,5 +26,12 @@
             "email": "tanaphon.wat@gmail.com"
         }
     ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DerFlohwalzer\\LaravelSubscription\\PackageServiceProvider"
+            ]
+        }
+    },
     "minimum-stability": "dev"
 }
