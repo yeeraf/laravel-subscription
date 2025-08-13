@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 
 trait HasPackagePlan
 {
-    public function packagePlans()
+    public function subscriptions()
     {
         return $this->morphMany(ModelPackagePlan::class, 'model');
     }
@@ -22,11 +22,11 @@ trait HasPackagePlan
      * @return \DerFlohwalzer\LaravelSubscription\Models\ModelPackagePlan
 
      */
-    public function currentPackagePlan(?\DateTimeInterface $currentDateTime = null): ModelPackagePlan
+    public function currentSubscription(?\DateTimeInterface $currentDateTime = null): ModelPackagePlan
     {
         $currentDateTime = $currentDateTime ?? now();
 
-        return $this->packagePlans()
+        return $this->subscriptions()
             ->where(function ($q) use ($currentDateTime) {
                 $q->where('status', ModelPackagePlan::STATUS_ACTIVE);
                 $q->where('start_date', '<=', $currentDateTime);
@@ -39,7 +39,7 @@ trait HasPackagePlan
     public function getBenefitValue(string $benefitName, ?\DateTimeInterface $currentDateTime = null): mixed 
     {
         $currentDateTime = $currentDateTime ?? now();
-        $packagePlan = $this->currentPackagePlan();
+        $packagePlan = $this->currentSubscription();
         
         $benefitPackagePlan = $packagePlan
             ->packagePlans
