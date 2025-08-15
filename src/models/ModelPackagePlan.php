@@ -18,7 +18,7 @@ class ModelPackagePlan extends Model
         return $this->morphTo();
     }
 
-    public function packagePlans()
+    public function packagePlan()
     {
         return $this->belongsTo(PackagePlan::class)
             ->withDefault();
@@ -44,7 +44,9 @@ class ModelPackagePlan extends Model
         $currentDateTime = $currentDateTime ?? Carbon::now();
         $endDate = $currentDateTime->copy()->addDays($this->packagePlanPrice->day_duration);
         
-        $existedPackagePlans = $this->packagePlans()
+        $existedPackagePlans = ModelPackagePlan::query()
+            ->where('model_id', $this->model_id)
+            ->where('model_type', $this->model_type)
             ->where('status', ModelPackagePlan::STATUS_ACTIVE)
             ->where(function ($q) use ($currentDateTime) {
                 $q->whereNull('end_date')

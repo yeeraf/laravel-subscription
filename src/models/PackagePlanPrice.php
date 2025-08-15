@@ -12,9 +12,4 @@ class PackagePlanPrice extends Model
     {
         return $this->belongsTo(PackagePlan::class);
     }
-
-    public function modelPackagePlan()
-    {
-        return $this->belongsTo(ModelPackagePlan::class);
-    }
 }

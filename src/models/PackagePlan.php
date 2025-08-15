@@ -4,6 +4,8 @@ namespace DerFlohwalzer\LaravelSubscription\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use DerFlohwalzer\LaravelSubscription\Models\BenefitPackagePlanLog;
 
 class PackagePlan extends Model
 {
@@ -46,14 +48,18 @@ class PackagePlan extends Model
     {
         $currentDateTime = $currentDateTime ?? now();
 
-        // Retrieve the first active benefit matching the name and date criteria
+        // Retrieve the first active benefit matching the name and date criteria (filter on pivot columns)
         return $this->benefits()
             ->where('name', $benefitName)
-            ->where('start_date', '<=', $currentDateTime)
             ->where(function ($query) use ($currentDateTime) {
-                $query->whereNull('end_date')
-                      ->orWhere('end_date', '>=', $currentDateTime);
+                $query->whereNull('benefit_package_plan.start_date')
+                      ->orWhere('benefit_package_plan.start_date', '<=', $currentDateTime);
             })
+            ->where(function ($query) use ($currentDateTime) {
+                $query->whereNull('benefit_package_plan.end_date')
+                      ->orWhere('benefit_package_plan.end_date', '>=', $currentDateTime);
+            })
+            ->orderBy('benefit_package_plan.created_at', 'desc')
             ->first();
     }
 
@@ -71,25 +77,25 @@ class PackagePlan extends Model
         $benefit = Benefit::where('name', $benefitName)->firstOrFail();
 
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
                 $benefitPackagePlan = BenefitPackagePlan::create([
-                'package_plan_id' => $this->id,
-                'benefit_id' => $benefit->id,
-                'value' => $value,
-                'start_date' => $startDate,
-                'end_date' => $endDate
-            ]);
+                    'package_plan_id' => $this->id,
+                    'benefit_id' => $benefit->id,
+                    'value' => $value,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate
+                ]);
 
-            BenefitPackagePlanLog::logAction(
-                $benefitPackagePlan, 
-                'create', 
-                "Assigned benefit {$benefitName} to package plan {$this->name}",
-                $benefitPackagePlan->toArray()
-            );
+                BenefitPackagePlanLog::logAction(
+                    $benefitPackagePlan,
+                    'create',
+                    "Assigned benefit {$benefitName} to package plan {$this->name}",
+                    $benefitPackagePlan->toArray()
+                );
 
-            \DB::commit();
+            DB::commit();
         } catch (\Throwable $th) {
-            \DB::rollBack();
+            DB::rollBack();
             throw $th;
         }
        
@@ -100,22 +106,36 @@ class PackagePlan extends Model
     public function updateBenefit(string $benefitName, string $value, ?Carbon $startDate = null, ?Carbon $endDate = null)
     {
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
                 $benefit = $this->findActiveBenefit($benefitName, now());
+                if (!$benefit) {
+                    DB::rollBack();
+                    return;
+                }
+
                 $benefit->pivot->value = $value;
                 $benefit->pivot->start_date = $startDate;
                 $benefit->pivot->end_date = $endDate;
                 $benefit->pivot->save();
 
-                BenefitPackagePlan::logAction(
-                    $benefit, 
-                    'update', 
-                    "Updated benefit {$benefitName} on package plan {$this->name}",
-                    $benefit->pivot->toArray()
-                );
-            \DB::commit();
+                // Retrieve the actual pivot row model for logging
+                $benefitPackagePlan = BenefitPackagePlan::query()
+                    ->where('package_plan_id', $this->id)
+                    ->where('benefit_id', $benefit->id)
+                    ->latest('created_at')
+                    ->first();
+
+                if ($benefitPackagePlan) {
+                    BenefitPackagePlanLog::logAction(
+                        $benefitPackagePlan,
+                        'update',
+                        "Updated benefit {$benefitName} on package plan {$this->name}",
+                        $benefit->pivot->toArray()
+                    );
+                }
+            DB::commit();
         } catch (\Throwable $th) {
-            \DB::rollBack();
+            DB::rollBack();
             throw $th;
         }
         
@@ -125,20 +145,33 @@ class PackagePlan extends Model
     public function endBenefit(string $benefitName)
     {
         try {
-            \DB::beginTransaction();
-            $benefit = $this->findActiveBenefit($benefitName, now());
-            $benefit->pivot->end_date = now();
-            $benefit->pivot->save();
+            DB::beginTransaction();
+                $benefit = $this->findActiveBenefit($benefitName, now());
+                if (!$benefit) {
+                    DB::rollBack();
+                    return;
+                }
 
-            BenefitPackagePlan::logAction(
-                $benefit, 
-                'update', 
-                "Ended benefit {$benefitName} on package plan {$this->name}",
-                $benefit->pivot->toArray()
-            );
-            \DB::commit();
+                $benefit->pivot->end_date = now();
+                $benefit->pivot->save();
+
+                $benefitPackagePlan = BenefitPackagePlan::query()
+                    ->where('package_plan_id', $this->id)
+                    ->where('benefit_id', $benefit->id)
+                    ->latest('created_at')
+                    ->first();
+
+                if ($benefitPackagePlan) {
+                    BenefitPackagePlanLog::logAction(
+                        $benefitPackagePlan,
+                        'update',
+                        "Ended benefit {$benefitName} on package plan {$this->name}",
+                        $benefit->pivot->toArray()
+                    );
+                }
+            DB::commit();
         } catch (\Throwable $th) {
-            \DB::rollBack();
+            DB::rollBack();
             throw $th;
         }
         

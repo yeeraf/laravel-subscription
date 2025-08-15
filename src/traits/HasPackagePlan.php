@@ -85,6 +85,7 @@ trait HasPackagePlan
             'model_id' => $this->id,
             'model_type' => get_class($this),
             'package_plan_price_id' => $packagePlanPrice->id,
+            'package_plan_id' => $packagePlanPrice->package_plan_id,
             'status' => ModelPackagePlan::STATUS_PENDING,
             'created_by' => $createdBy
         ]);
