@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PackagePlanPrice extends Model
 {
-    protected $gaurded = [];
+    protected $guarded = [];
 
     public function packagePlan()
     {

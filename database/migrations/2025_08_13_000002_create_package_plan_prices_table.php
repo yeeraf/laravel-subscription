@@ -15,7 +15,7 @@ class CreatePackagePlanPricesTable extends Migration
     {
         Schema::create('package_plan_prices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('package_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('package_plan_id')->constrained()->cascadeOnDelete();
             $table->decimal('price', 10, 2);
             $table->string('currency', 3);
             $table->integer('day_duration');

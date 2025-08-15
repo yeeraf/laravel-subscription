@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BenefitPackagePlanLog extends Model
 {
-    protected $gaurded = [];
+    protected $guarded = [];
 
     protected $casts = [
         'changes' => 'array',
@@ -19,9 +19,9 @@ class BenefitPackagePlanLog extends Model
         return $this->belongsTo(BenefitPackagePlan::class, 'benefit_package_plan_id');
     }
 
-    public function logAction(BenefitPackagePlan $benefitPackagePlan, string $action, ?string $description = null, array $changes = [])
+    public static function logAction(BenefitPackagePlan $benefitPackagePlan, string $action, ?string $description = null, array $changes = [])
     {
-        return $this->create([
+        return self::create([
             'benefit_package_plan_id'=> $benefitPackagePlan->id,
             'action'               => $action,
             'description'          => $description,

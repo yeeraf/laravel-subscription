@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Benefit extends Model
 {
-    protected $gaurded = [];
+    protected $guarded = [];
 
     private static $types = ['string', 'float', 'int', 'bool', 'datetime'];
 

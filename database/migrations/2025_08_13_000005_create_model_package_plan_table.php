@@ -20,7 +20,7 @@ class CreateModelPackagePlanTable extends Migration
             $table->foreignId('package_plan_price_id')->constrained()->onDelete('no action');
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
-            $table->string('status')->default('active');
+            $table->string('status')->default('pending');
             $table->text('remark')->nullable();
 
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');

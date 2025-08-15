@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ModelPackagePlanLog extends Model
 {
-    protected $gaurded = [];
+    protected $guarded = [];
 
     protected $casts = [
         'changes' => 'array',
