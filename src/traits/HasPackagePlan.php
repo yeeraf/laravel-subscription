@@ -4,8 +4,6 @@ namespace  DerFlohwalzer\LaravelSubscription\Traits;
 
 use DerFlohwalzer\LaravelSubscription\Models\ModelPackagePlan;
 use DerFlohwalzer\LaravelSubscription\Models\PackagePlanPrice;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Mix;
 use Illuminate\Support\Carbon;
 
 trait HasPackagePlan
@@ -36,26 +34,41 @@ trait HasPackagePlan
         ->first();
     }
 
-    public function getBenefitValue(string $benefitName, ?\DateTimeInterface $currentDateTime = null): mixed 
+    public function getBenefitValue(string $benefitName, ?Carbon $currentDateTime = null): mixed
     {
-        $currentDateTime = $currentDateTime ?? now();
-        $packagePlan = $this->currentSubscription();
-        
-        $benefitPackagePlan = $packagePlan
-            ->packagePlans
-            ->whereHas('benefits', function ($q) use ($benefitName) {
-                $q->where('name', $benefitName);
+        $currentDateTime = $currentDateTime ?? Carbon::now();
+
+        // Find current active subscription for this model
+        $subscription = $this->currentSubscription($currentDateTime);
+        if (!$subscription) {
+            return null;
+        }
+
+        // Resolve the package plan via the subscription's price
+        $packagePlan = $subscription->packagePlan;
+        if (!$packagePlan || !$packagePlan->exists) {
+            return null;
+        }
+
+        // Query the package plan's benefits by name and active date window
+        $benefit = $packagePlan->benefits()
+            ->where('name', $benefitName)
+            ->where(function ($q) use ($currentDateTime) {
+                $q->whereNull('benefit_package_plan.end_date')
+                  ->orWhere('benefit_package_plan.end_date', '>=', $currentDateTime);
             })
             ->where(function ($q) use ($currentDateTime) {
-                $q->where('start_date', '<=', $currentDateTime);
-                $q->whereNull('end_date')
-                  ->orWhere('end_date', '>=', $currentDateTime);
+                $q->whereNull('benefit_package_plan.start_date')
+                  ->orWhere('benefit_package_plan.start_date', '<=', $currentDateTime);
             })
-            ->latest('created_at')
+            ->orderBy('benefit_package_plan.created_at', 'desc')
             ->first();
 
+        if (!$benefit) {
+            return null;
+        }
 
-        return $this->castBenefitValue($benefitPackagePlan->pivot->value, $benefitPackagePlan->type);
+        return $this->castBenefitValue($benefit->pivot->value, $benefit->type);
     }
 
     public function subscribeToPackagePlan(PackagePlanPrice $packagePlanPrice, ?Carbon $currentDateTime = null, ?int $createdBy = null): ModelPackagePlan 
