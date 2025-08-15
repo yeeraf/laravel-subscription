@@ -8,6 +8,8 @@ class Benefit extends Model
 {
     protected $gaurded = [];
 
+    private static $types = ['string', 'float', 'int', 'bool', 'datetime'];
+
     public function benefitPackagePlan()
     {
         return $this->hasMany(BenefitPackagePlan::class);

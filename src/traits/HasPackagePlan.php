@@ -88,7 +88,6 @@ trait HasPackagePlan
             'float' => (float) $value,
             'int' => (int) $value,
             'bool' => (bool) $value,
-            'datetime' => \DateTime::createFromFormat('Y-m-d H:i:s', $value),
             default => $value,
         };    
     }

@@ -18,7 +18,7 @@ class CreateBenefitPackagePlanTable extends Migration
             $table->foreignId('package_plan_id')->constrained()->cascadeOnDelete();
             $table->foreignId('benefit_id')->constrained()->cascadeOnDelete();
             $table->string('value');
-            $table->dateTime('start_date');
+            $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
 
             $table->timestamps();
