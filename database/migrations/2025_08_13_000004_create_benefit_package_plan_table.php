@@ -20,6 +20,7 @@ class CreateBenefitPackagePlanTable extends Migration
             $table->string('value');
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
+            
 
             $table->timestamps();
         });

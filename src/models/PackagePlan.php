@@ -70,26 +70,77 @@ class PackagePlan extends Model
     {
         $benefit = Benefit::where('name', $benefitName)->firstOrFail();
 
-        BenefitPackagePlan::create([
-            'package_plan_id' => $this->id,
-            'benefit_id' => $benefit->id,
-            'value' => $value,
-            'start_date' => $startDate,
-            'end_date' => $endDate
-        ]);
+        try {
+            \DB::beginTransaction();
+                $benefitPackagePlan = BenefitPackagePlan::create([
+                'package_plan_id' => $this->id,
+                'benefit_id' => $benefit->id,
+                'value' => $value,
+                'start_date' => $startDate,
+                'end_date' => $endDate
+            ]);
 
+            BenefitPackagePlanLog::logAction(
+                $benefitPackagePlan, 
+                'create', 
+                "Assigned benefit {$benefitName} to package plan {$this->name}",
+                $benefitPackagePlan->toArray()
+            );
+
+            \DB::commit();
+        } catch (\Throwable $th) {
+            \DB::rollBack();
+            throw $th;
+        }
+       
         return $this;
     }
 
 
     public function updateBenefit(string $benefitName, string $value, ?Carbon $startDate = null, ?Carbon $endDate = null)
     {
-        $benefit = $this->findActiveBenefit($benefitName, now());
-        $benefit->pivot->value = $value;
-        $benefit->pivot->start_date = $startDate;
-        $benefit->pivot->end_date = $endDate;
-        $benefit->pivot->save();
+        try {
+            \DB::beginTransaction();
+                $benefit = $this->findActiveBenefit($benefitName, now());
+                $benefit->pivot->value = $value;
+                $benefit->pivot->start_date = $startDate;
+                $benefit->pivot->end_date = $endDate;
+                $benefit->pivot->save();
 
+                BenefitPackagePlan::logAction(
+                    $benefit, 
+                    'update', 
+                    "Updated benefit {$benefitName} on package plan {$this->name}",
+                    $benefit->pivot->toArray()
+                );
+            \DB::commit();
+        } catch (\Throwable $th) {
+            \DB::rollBack();
+            throw $th;
+        }
+        
+        
     }
     
+    public function endBenefit(string $benefitName)
+    {
+        try {
+            \DB::beginTransaction();
+            $benefit = $this->findActiveBenefit($benefitName, now());
+            $benefit->pivot->end_date = now();
+            $benefit->pivot->save();
+
+            BenefitPackagePlan::logAction(
+                $benefit, 
+                'update', 
+                "Ended benefit {$benefitName} on package plan {$this->name}",
+                $benefit->pivot->toArray()
+            );
+            \DB::commit();
+        } catch (\Throwable $th) {
+            \DB::rollBack();
+            throw $th;
+        }
+        
+    }
 }
