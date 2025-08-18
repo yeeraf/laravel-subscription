@@ -1,5 +1,5 @@
 {
-    "name": "derflohwalzer/laravel-subscription",
+    "name": "yeeraf/laravel-subscription",
     "description": "A Laravel package for create subscription service with different benefits.",
     "type": "library",
     "require": {
