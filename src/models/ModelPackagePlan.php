@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 
 class ModelPackagePlan extends Model
 {
+    protected $table = 'model_package_plan';
     protected $guarded = [];
 
     public const STATUS_PENDING = 'pending';

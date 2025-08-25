@@ -20,7 +20,7 @@ trait HasPackagePlan
      * @return \Yeeraf\LaravelSubscription\Models\ModelPackagePlan
 
      */
-    public function currentSubscription(?\DateTimeInterface $currentDateTime = null): ModelPackagePlan
+    public function currentSubscription(?\DateTimeInterface $currentDateTime = null): ModelPackagePlan | null
     {
         $currentDateTime = $currentDateTime ?? now();
 
