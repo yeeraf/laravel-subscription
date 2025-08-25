@@ -12,14 +12,21 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "DerFlohwalzer\\LaravelSubscription\\": "src/"
+            "Yeeraf\\LaravelSubscription\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "DerFlohwalzer\\LaravelSubscription\\Tests\\": "tests/"
+            "Yeeraf\\LaravelSubscription\\Tests\\": "tests/"
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/tanaphonwatcharakomenkul/Documents/yeeraf/laravel-subscription/",
+            "options": { "symlink": true }
+        }
+    ],
     "authors": [
         {
             "name": "derflohwalzer",
@@ -29,7 +36,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "DerFlohwalzer\\LaravelSubscription\\PackageServiceProvider"
+                "Yeeraf\\LaravelSubscription\\PackageServiceProvider"
             ]
         }
     },
