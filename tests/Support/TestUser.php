@@ -1,9 +1,9 @@
 <?php
 
-namespace DerFlohwalzer\LaravelSubscription\Tests\Support;
+namespace Yeeraf\LaravelSubscription\Tests\Support;
 
 use Illuminate\Database\Eloquent\Model;
-use DerFlohwalzer\LaravelSubscription\Traits\HasPackagePlan;
+use Yeeraf\LaravelSubscription\Traits\HasPackagePlan;
 
 class TestUser extends Model
 {

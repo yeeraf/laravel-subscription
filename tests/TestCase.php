@@ -1,9 +1,9 @@
 <?php
 
-namespace DerFlohwalzer\LaravelSubscription\Tests;
+namespace Yeeraf\LaravelSubscription\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
-use DerFlohwalzer\LaravelSubscription\PackageServiceProvider;
+use Yeeraf\LaravelSubscription\PackageServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 

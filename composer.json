@@ -20,13 +20,6 @@
             "Yeeraf\\LaravelSubscription\\Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/Users/tanaphonwatcharakomenkul/Documents/yeeraf/laravel-subscription/",
-            "options": { "symlink": true }
-        }
-    ],
     "authors": [
         {
             "name": "derflohwalzer",
@@ -42,3 +35,4 @@
     },
     "minimum-stability": "dev"
 }
+

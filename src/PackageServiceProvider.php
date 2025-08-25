@@ -1,6 +1,6 @@
 <?php
 
-namespace DerFlohwalzer\LaravelSubscription;
+namespace Yeeraf\LaravelSubscription;
 
 use Illuminate\Support\ServiceProvider;
 

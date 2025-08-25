@@ -1,9 +1,9 @@
 <?php
 
-namespace  DerFlohwalzer\LaravelSubscription\Traits;
+namespace  Yeeraf\LaravelSubscription\Traits;
 
-use DerFlohwalzer\LaravelSubscription\Models\ModelPackagePlan;
-use DerFlohwalzer\LaravelSubscription\Models\PackagePlanPrice;
+use Yeeraf\LaravelSubscription\Models\ModelPackagePlan;
+use Yeeraf\LaravelSubscription\Models\PackagePlanPrice;
 use Illuminate\Support\Carbon;
 
 trait HasPackagePlan
@@ -17,7 +17,7 @@ trait HasPackagePlan
      * Get the current active package plan for a given date and time.
      *
      * @param \DateTimeInterface|null $currentDateTime The current date and time.
-     * @return \DerFlohwalzer\LaravelSubscription\Models\ModelPackagePlan
+     * @return \Yeeraf\LaravelSubscription\Models\ModelPackagePlan
 
      */
     public function currentSubscription(?\DateTimeInterface $currentDateTime = null): ModelPackagePlan

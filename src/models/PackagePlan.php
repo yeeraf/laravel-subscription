@@ -1,11 +1,11 @@
 <?php
 
-namespace DerFlohwalzer\LaravelSubscription\Models;
+namespace Yeeraf\LaravelSubscription\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use DerFlohwalzer\LaravelSubscription\Models\BenefitPackagePlanLog;
+use Yeeraf\LaravelSubscription\Models\BenefitPackagePlanLog;
 
 class PackagePlan extends Model
 {

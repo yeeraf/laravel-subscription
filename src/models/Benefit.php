@@ -1,6 +1,6 @@
 <?php
 
-namespace DerFlohwalzer\LaravelSubscription\Models;
+namespace Yeeraf\LaravelSubscription\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

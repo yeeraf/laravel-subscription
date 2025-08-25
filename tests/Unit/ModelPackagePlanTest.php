@@ -1,14 +1,14 @@
 <?php
 
-namespace DerFlohwalzer\LaravelSubscription\Tests\Unit;
+namespace Yeeraf\LaravelSubscription\Tests\Unit;
 
-use DerFlohwalzer\LaravelSubscription\Tests\TestCase;
-use DerFlohwalzer\LaravelSubscription\Tests\Support\TestUser;
+use Yeeraf\LaravelSubscription\Tests\TestCase;
+use Yeeraf\LaravelSubscription\Tests\Support\TestUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use DerFlohwalzer\LaravelSubscription\Models\ModelPackagePlan;
-use DerFlohwalzer\LaravelSubscription\Models\PackagePlan;
-use DerFlohwalzer\LaravelSubscription\Models\PackagePlanPrice;
+use Yeeraf\LaravelSubscription\Models\ModelPackagePlan;
+use Yeeraf\LaravelSubscription\Models\PackagePlan;
+use Yeeraf\LaravelSubscription\Models\PackagePlanPrice;
 
 class ModelPackagePlanTest extends TestCase
 {
