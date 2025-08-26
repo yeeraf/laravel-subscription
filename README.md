@@ -167,7 +167,6 @@ $current = $user->currentSubscription(); // คืนค่า ModelPackagePlan 
 ### แก้ไขและลบ Benefit ที่ผูกกับ Package
 
 แก้ไขค่า/ช่วงเวลา (Update)
-- ใช้เมธอด `updateBenefit($benefitName, $value, ?Carbon $startDate = null, ?Carbon $endDate = null)` เพื่อแก้ไขค่า หรือช่วงเวลาที่มีผลของ Benefit ที่กำลัง Active อยู่
 
 ตัวอย่าง: เปลี่ยนค่าของ "max_user_count" เป็น 20 มีผลวันนี้ถึงอีก 12 เดือน
 ```php
@@ -203,12 +202,7 @@ if ($active) {
 }
 ```
 
-หมายเหตุ:
-- `updateBenefit` จะมีผลเฉพาะเมื่อพบ Benefit ที่ Active ตามวัน-เวลาปัจจุบัน หากไม่พบจะไม่เกิดการเปลี่ยนแปลง
-- ระบบจะบันทึก Log การแก้ไขลงตาราง `benefit_package_plan_logs` ให้อัตโนมัติ
-
-ยุติการให้สิทธิ์ (End/Expire) แทนการลบ
-- หากต้องการ “เลิกให้สิทธิ์” ทันที โดยยังเก็บประวัติไว้ แนะนำให้ใช้ `endBenefit($benefitName)` ซึ่งจะตั้ง `end_date` เป็นเวลาปัจจุบัน
+### ยุติการให้สิทธิ์
 
 ```php
 use Yeeraf\LaravelSubscription\Models\PackagePlan;
