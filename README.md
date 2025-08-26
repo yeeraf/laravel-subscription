@@ -210,21 +210,3 @@ use Yeeraf\LaravelSubscription\Models\PackagePlan;
 $plan = PackagePlan::where('name', 'Pro')->first();
 $plan->endBenefit('max_user_count'); // ยุติสิทธิ์ทันที (บันทึก Log อัตโนมัติ)
 ```
-
-ลบความสัมพันธ์แบบถาวร (Hard delete) — ไม่แนะนำ
-- การลบ Pivot record ออกจากตาราง `benefit_package_plan` โดยตรงจะทำให้สูญเสียประวัติ (ไม่เกิด Log การลบ) จึงแนะนำให้ใช้ `endBenefit` แทน
-- หากจำเป็นต้องลบจริงๆ (ยอมรับความเสี่ยงเรื่องประวัติ):
-
-```php
-use Yeeraf\LaravelSubscription\Models\Benefit;
-use Yeeraf\LaravelSubscription\Models\BenefitPackagePlan;
-use Yeeraf\LaravelSubscription\Models\PackagePlan;
-
-$plan = PackagePlan::where('name', 'Pro')->first();
-$benefit = Benefit::where('name', 'max_user_count')->first();
-
-BenefitPackagePlan::query()
-    ->where('package_plan_id', $plan->id)
-    ->where('benefit_id', $benefit->id)
-    ->delete(); // ไม่สร้าง Log และทำให้ประวัติขาดตอน
-```
