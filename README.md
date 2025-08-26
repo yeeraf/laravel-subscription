@@ -163,3 +163,74 @@ $value = $user->getBenefitValue('max_user_count'); // เช่น 10 (int)
 $current = $user->currentSubscription(); // คืนค่า ModelPackagePlan ที่ active ล่าสุด หรือ null
 ```
 
+
+### แก้ไขและลบ Benefit ที่ผูกกับ Package
+
+แก้ไขค่า/ช่วงเวลา (Update)
+- ใช้เมธอด `updateBenefit($benefitName, $value, ?Carbon $startDate = null, ?Carbon $endDate = null)` เพื่อแก้ไขค่า หรือช่วงเวลาที่มีผลของ Benefit ที่กำลัง Active อยู่
+
+ตัวอย่าง: เปลี่ยนค่าของ "max_user_count" เป็น 20 มีผลวันนี้ถึงอีก 12 เดือน
+```php
+use Illuminate\Support\Carbon;
+use Yeeraf\LaravelSubscription\Models\PackagePlan;
+
+$plan = PackagePlan::where('name', 'Pro')->first();
+
+$plan->updateBenefit(
+    'max_user_count',
+    '20',
+    Carbon::now(),
+    Carbon::now()->addMonths(12)
+);
+```
+
+ตัวอย่าง: เปลี่ยนเฉพาะช่วงเวลา โดยคงค่าเดิมไว้ (ดึงค่าปัจจุบันด้วย `findActiveBenefit` ก่อน)
+```php
+use Illuminate\Support\Carbon;
+use Yeeraf\LaravelSubscription\Models\PackagePlan;
+
+$plan = PackagePlan::where('name', 'Pro')->first();
+
+$active = $plan->findActiveBenefit('max_user_count', now());
+if ($active) {
+    $currentValue = (string) $active->pivot->value; // ค่าปัจจุบันที่ใช้งานอยู่
+    $plan->updateBenefit(
+        'max_user_count',
+        $currentValue,
+        Carbon::parse('2025-01-01'),
+        Carbon::parse('2025-12-31')
+    );
+}
+```
+
+หมายเหตุ:
+- `updateBenefit` จะมีผลเฉพาะเมื่อพบ Benefit ที่ Active ตามวัน-เวลาปัจจุบัน หากไม่พบจะไม่เกิดการเปลี่ยนแปลง
+- ระบบจะบันทึก Log การแก้ไขลงตาราง `benefit_package_plan_logs` ให้อัตโนมัติ
+
+ยุติการให้สิทธิ์ (End/Expire) แทนการลบ
+- หากต้องการ “เลิกให้สิทธิ์” ทันที โดยยังเก็บประวัติไว้ แนะนำให้ใช้ `endBenefit($benefitName)` ซึ่งจะตั้ง `end_date` เป็นเวลาปัจจุบัน
+
+```php
+use Yeeraf\LaravelSubscription\Models\PackagePlan;
+
+$plan = PackagePlan::where('name', 'Pro')->first();
+$plan->endBenefit('max_user_count'); // ยุติสิทธิ์ทันที (บันทึก Log อัตโนมัติ)
+```
+
+ลบความสัมพันธ์แบบถาวร (Hard delete) — ไม่แนะนำ
+- การลบ Pivot record ออกจากตาราง `benefit_package_plan` โดยตรงจะทำให้สูญเสียประวัติ (ไม่เกิด Log การลบ) จึงแนะนำให้ใช้ `endBenefit` แทน
+- หากจำเป็นต้องลบจริงๆ (ยอมรับความเสี่ยงเรื่องประวัติ):
+
+```php
+use Yeeraf\LaravelSubscription\Models\Benefit;
+use Yeeraf\LaravelSubscription\Models\BenefitPackagePlan;
+use Yeeraf\LaravelSubscription\Models\PackagePlan;
+
+$plan = PackagePlan::where('name', 'Pro')->first();
+$benefit = Benefit::where('name', 'max_user_count')->first();
+
+BenefitPackagePlan::query()
+    ->where('package_plan_id', $plan->id)
+    ->where('benefit_id', $benefit->id)
+    ->delete(); // ไม่สร้าง Log และทำให้ประวัติขาดตอน
+```
